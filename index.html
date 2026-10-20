@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#090d18" />
+  <meta name="description" content="Faizan Flash Forge - browser ESP32 firmware flasher" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Faizan Flash Forge</title>
+</head>
+<body>
+  <div class="aurora a1"></div><div class="aurora a2"></div>
+  <header class="topbar glass">
+    <a class="brand" href="#"><span class="brandmark">FF</span><span><b>FLASH FORGE</b><small>ESP32 CONTROL DECK</small></span></a>
+    <div class="status-pills"><span id="securePill">Secure context</span><span id="apiPill">Web Serial</span></div>
+    <button id="themeBtn" class="icon-btn" aria-label="Toggle theme">◐</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">FAIZAN LABS / DEVICE ENGINEERING</div>
+      <h1>Firmware flashing,<br><span>without friction.</span></h1>
+      <p>Load a GitHub repository, a release URL, or local binary files. Inspect the image map, connect your ESP device, then flash from the browser.</p>
+      <div class="hero-actions"><button id="connectBtn" class="primary">Connect device</button><button id="demoBtn" class="secondary">Open guided mode</button></div>
+    </section>
+
+    <section class="workspace glass">
+      <nav class="steps" aria-label="Workflow">
+        <button class="step active" data-step="1"><i>1</i><span>Source<small>Choose firmware</small></span></button>
+        <button class="step" data-step="2"><i>2</i><span>Configure<small>Review image map</small></span></button>
+        <button class="step" data-step="3"><i>3</i><span>Flash<small>Write and verify</small></span></button>
+      </nav>
+
+      <div class="panel active" data-panel="1">
+        <div class="panel-head"><div><span class="kicker">01 / SOURCE</span><h2>Where is your firmware?</h2></div><span class="safety">Files stay in your browser</span></div>
+        <div class="source-grid">
+          <article class="source-card featured">
+            <div class="card-icon">⌁</div><h3>GitHub Intelligence</h3><p>Paste a repository, release, tag, or asset URL. The resolver searches release assets first, then repository binaries and web-flasher manifests.</p>
+            <div class="input-row"><input id="githubUrl" type="url" placeholder="https://github.com/owner/repository" autocomplete="off"><button id="resolveBtn">Analyze</button></div>
+            <div id="repoMeta" class="repo-meta hidden"></div>
+          </article>
+          <label class="source-card dropzone" id="dropzone">
+            <input id="fileInput" type="file" accept=".bin,application/octet-stream" multiple hidden>
+            <div class="card-icon">⇧</div><h3>Local binaries</h3><p>Drop one or more .bin files here, or tap to browse. Filenames are used to suggest safe flash offsets.</p><strong>Choose .bin files</strong>
+          </label>
+        </div>
+        <div class="panel-actions"><span id="sourceHint">No firmware loaded</span><button class="next primary" data-next="2" disabled>Continue</button></div>
+      </div>
+
+      <div class="panel" data-panel="2">
+        <div class="panel-head"><div><span class="kicker">02 / CONFIGURE</span><h2>Review before writing</h2></div><button id="addFileBtn" class="secondary small">+ Add binary</button></div>
+        <div class="device-strip"><div><small>DEVICE</small><b id="deviceName">Not connected</b></div><div><small>CHIP</small><b id="chipName">Auto-detect</b></div><div><small>TRANSPORT</small><b id="transportName">Web Serial / USB</b></div></div>
+        <div class="image-table"><div class="image-head"><span>Firmware image</span><span>Flash address</span><span>Size</span><span></span></div><div id="imageRows"></div></div>
+        <details class="advanced"><summary>Advanced flash settings <span>▾</span></summary><div class="settings-grid">
+          <label>Baud rate<select id="baud"><option>115200</option><option>230400</option><option selected>460800</option><option>921600</option></select></label>
+          <label>Flash mode<select id="flashMode"><option value="keep" selected>Keep detected</option><option value="dio">DIO</option><option value="qio">QIO</option><option value="dout">DOUT</option></select></label>
+          <label>Flash frequency<select id="flashFreq"><option value="keep" selected>Keep detected</option><option value="40m">40 MHz</option><option value="80m">80 MHz</option><option value="20m">20 MHz</option></select></label>
+          <label>Flash size<select id="flashSize"><option value="keep" selected>Auto detect</option><option value="4MB">4 MB</option><option value="8MB">8 MB</option><option value="16MB">16 MB</option></select></label>
+          <label class="toggle"><input id="eraseAll" type="checkbox"><span></span>Erase full flash first</label>
+          <label class="toggle"><input id="compress" type="checkbox" checked><span></span>Compress transfer</label>
+        </div></details>
+        <div class="warning"><b>Check flash offsets.</b> A wrong address can make the board unbootable. The suggested values are filename-based and must match the firmware build.</div>
+        <div class="panel-actions"><button class="back secondary" data-back="1">Back</button><button class="next primary" data-next="3">Ready to flash</button></div>
+      </div>
+
+      <div class="panel" data-panel="3">
+        <div class="panel-head"><div><span class="kicker">03 / FLASH</span><h2>Device operation</h2></div><span id="operationBadge" class="safety">Ready</span></div>
+        <div class="flash-layout">
+          <div class="progress-card"><div class="ring" id="ring"><div><strong id="progressText">0%</strong><small id="progressPhase">IDLE</small></div></div><h3 id="flashTitle">Ready when you are</h3><p id="flashSub">Connect the board, hold BOOT if required, and start flashing.</p><button id="flashBtn" class="primary wide">Flash firmware</button><button id="cancelBtn" class="danger wide hidden">Cancel operation</button></div>
+          <div class="terminal-card"><div class="terminal-head"><span><i></i> LIVE CONSOLE</span><div><button id="copyLog">Copy</button><button id="clearLog">Clear</button></div></div><pre id="terminal">[system] Flash Forge initialized.
+[system] Waiting for firmware and device...</pre></div>
+        </div>
+        <div class="panel-actions"><button class="back secondary" data-back="2">Back</button><button id="disconnectBtn" class="secondary">Disconnect</button></div>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>⟦ 𝐁𝐔𝐈𝐋𝐓 𝐁𝐘 𝐅𝐀𝐈𝐙𝐀𝐍 ⟧</span><small>FaizanLabs-EXE · Browser firmware tooling</small></footer>
+  <div id="toast" role="status"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

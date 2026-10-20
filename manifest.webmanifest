@@ -1,0 +1,10 @@
+{
+  "name": "Faizan Flash Forge",
+  "short_name": "Flash Forge",
+  "description": "Browser-based ESP32 firmware flasher by Faizan Labs",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#070a12",
+  "theme_color": "#090d18",
+  "icons": []
+}
